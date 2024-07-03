@@ -1,5 +1,9 @@
 package core
 
+import (
+	"hexagonal-go/src/lib/utils"
+)
+
 type Fish struct {
 	ID      string
 	Species string
@@ -7,9 +11,9 @@ type Fish struct {
 	Age     uint32
 }
 
-func (s *Fish) UpdateAge(Age uint32) Fish {
+func (s Fish) UpdateAge(Age uint32) Fish {
 	s.Age = Age
-	return *s
+	return s
 }
 
 /*
@@ -33,19 +37,7 @@ On maps, variables and move semantics:
 Accessing a value in a map returns a copy of that value. Modifying values returned from a map will have unexpected effects while the overhead of accessing items will be larger than neccessary. Maps should really only be used for pointer storage, but that is pretty impractical.
 
 Go lacks move-semantics, but is still passed by value. That means the values passed to a function is still accessible after passing them in the caller, modifying the value in the called function will not modify the value in the caller, since these are now two different instances of the passed type. For the beginner, this creates some pretty confusing behaviour where there are no compiler or runtime errors.
-
---- --- ---
-On enums and union types
-There are no proper enums. Modelling an enum using a type alias and const doesn't enforce type-safety at compile time.
-
-Example:
-	type MyEnum string
-
-	const (
-		First MyEnum = "first"
-		Second MyEnum = "second"
-	)
-
+utils
 	func (lhs: MyEnum) Test(rhs MyEnum) bool {
 		return lhs == rhs
 	}
@@ -57,16 +49,17 @@ Since there are no real union-types, one can't model enums using structs either,
 */
 
 type FishDrivingPort interface {
-	Read(id string) (Fish, error)
-	ReadCollection() []Fish
-	Create(species string, age uint32) Fish
-	Update(id string, age uint32) (Fish, error)
-	Delete(id string)
+	Read(id string) utils.Result[Fish, error]
+	ReadCollection() utils.Result[[]Fish, error]
+	Create(species string, age uint32) utils.Result[Fish, error]
+	Update(id string, age uint32) utils.Result[Fish, error]
+	Delete(id string) utils.Result[string, error]
 }
 
+// TODO - Rename ReadCollection to Load, and remove Read - there should only be a single function needed to load shit.
 type FishDrivenPort interface {
-	Read(id string) (Fish, error)
-	ReadCollection() []Fish
-	Save(fish Fish)
-	Delete(id string)
+	Read(id string) utils.Result[Fish, error]
+	ReadCollection() utils.Result[[]Fish, error]
+	Save(fish Fish) utils.Result[Fish, error]
+	Delete(id string) utils.Result[string, error]
 }

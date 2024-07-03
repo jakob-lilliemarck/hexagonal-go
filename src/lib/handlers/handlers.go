@@ -34,20 +34,21 @@ func GetFishByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	service := r.Context().Value(FishServiceKey).(driving.FishService)
-	fish, err := service.Read(id)
-	if err != nil {
+	result := service.Read(id)
+
+	if result.IsErr() {
 		http.Error(w, "Fish not found", http.StatusNotFound)
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, fish)
+	respondWithJSON(w, http.StatusOK, result.Unwrap())
 }
 
 // GetFishCollection handles GET /fish
 func GetFishCollection(w http.ResponseWriter, r *http.Request) {
 	service := r.Context().Value(FishServiceKey).(driving.FishService)
-	fish := service.ReadCollection()
-	respondWithJSON(w, http.StatusOK, fish)
+	result := service.ReadCollection()
+	respondWithJSON(w, http.StatusOK, result.Unwrap())
 }
 
 // CreateFish handles POST /fish to create a new fish
@@ -63,10 +64,10 @@ func CreateFish(w http.ResponseWriter, r *http.Request) {
 	}
 
 	service := r.Context().Value(FishServiceKey).(driving.FishService)
-	fish := service.Create(input.Species, input.Age)
+	result := service.Create(input.Species, input.Age)
 
 	// Respond with the created fish as JSON
-	respondWithJSON(w, http.StatusCreated, fish)
+	respondWithJSON(w, http.StatusCreated, result.Unwrap())
 }
 
 // CreateFish handles POST /fish to create a new fish
@@ -88,13 +89,14 @@ func UpdateFish(w http.ResponseWriter, r *http.Request) {
 	}
 
 	service := r.Context().Value(FishServiceKey).(driving.FishService)
-	fish, err := service.Update(id, input.Age)
-	if err != nil {
+	result := service.Update(id, input.Age)
+
+	if result.IsErr() {
 		http.Error(w, "ERROR", http.StatusBadRequest)
 	}
 
 	// Respond with the created fish as JSON
-	respondWithJSON(w, http.StatusCreated, fish)
+	respondWithJSON(w, http.StatusCreated, result.Unwrap())
 }
 
 // CreateFish handles POST /fish to create a new fish
@@ -108,7 +110,7 @@ func DeleteFish(w http.ResponseWriter, r *http.Request) {
 
 	service := r.Context().Value(FishServiceKey).(driving.FishService)
 
-	service.Delete(id)
+	result := service.Delete(id)
 
-	respondWithJSON(w, http.StatusCreated, nil)
+	respondWithJSON(w, http.StatusCreated, result.Unwrap())
 }

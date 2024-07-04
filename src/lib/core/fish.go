@@ -11,9 +11,9 @@ type Fish struct {
 	Age     uint32
 }
 
-func (s Fish) UpdateAge(Age uint32) Fish {
+func (s Fish) UpdateAge(Age uint32) *Fish {
 	s.Age = Age
-	return s
+	return &s
 }
 
 /*
@@ -48,18 +48,18 @@ Since there are no real union-types, one can't model enums using structs either,
 
 */
 
-type FishDrivingPort interface {
-	Read(id string) utils.Result[Fish, error]
-	ReadCollection() utils.Result[[]Fish, error]
-	Create(species string, age uint32) utils.Result[Fish, error]
-	Update(id string, age uint32) utils.Result[Fish, error]
+type Driving interface {
+	Read(id string) utils.Result[*Fish, error]
+	ReadCollection() utils.Result[[]*Fish, error]
+	Create(species string, age uint32) utils.Result[*Fish, error]
+	Update(id string, age uint32) utils.Result[*Fish, error]
 	Delete(id string) utils.Result[string, error]
 }
 
 // TODO - Rename ReadCollection to Load, and remove Read - there should only be a single function needed to load shit.
-type FishDrivenPort interface {
-	Read(id string) utils.Result[Fish, error]
-	ReadCollection() utils.Result[[]Fish, error]
-	Save(fish Fish) utils.Result[Fish, error]
+type Driven interface {
+	Read(id string) utils.Result[*Fish, error]
+	ReadCollection() utils.Result[[]*Fish, error]
+	Save(fish *Fish) utils.Result[*Fish, error]
 	Delete(id string) utils.Result[string, error]
 }

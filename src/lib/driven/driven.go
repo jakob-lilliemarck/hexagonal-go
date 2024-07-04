@@ -6,40 +6,31 @@ import (
 	"hexagonal-go/src/lib/utils"
 )
 
-type FishRepository struct {
-	Storage map[string]*core.Fish
+type drivenAdapter struct {
+	hash utils.IHash[string, *core.Fish]
 }
 
-type NotFound struct{}
-
-func (s NotFound) Error() string {
-	return "Not found"
+func DrivenAdapter(hash utils.IHash[string, *core.Fish]) core.Driven {
+	return drivenAdapter{hash}
 }
 
-func (s FishRepository) Read(id string) utils.Result[core.Fish, error] {
-	fish, ok := s.Storage[id]
-	if !ok {
-		return utils.Err[core.Fish, error](errors.New("something went wrong"))
-	}
-	return utils.Ok[core.Fish, error](*fish)
+func (adapter drivenAdapter) Read(id string) utils.Result[*core.Fish, error] {
+	option := adapter.hash.Get(id)
+	result := utils.OkOr(option, errors.New("blabla"))
+	return result
 }
 
-func (s FishRepository) ReadCollection() utils.Result[[]core.Fish, error] {
-	collection := make([]core.Fish, 0, len(s.Storage))
-
-	for _, value := range s.Storage {
-		collection = append(collection, *value)
-	}
-
-	return utils.Ok[[]core.Fish, error](collection)
+func (adapter drivenAdapter) ReadCollection() utils.Result[[]*core.Fish, error] {
+	values := adapter.hash.Values()
+	return utils.Ok[[]*core.Fish, error](values)
 }
 
-func (s FishRepository) Save(fish core.Fish) utils.Result[core.Fish, error] {
-	s.Storage[fish.ID] = &fish
-	return utils.Ok[core.Fish, error](fish)
+func (adapter drivenAdapter) Save(fish *core.Fish) utils.Result[*core.Fish, error] {
+	adapter.hash.Insert(fish.ID, fish)
+	return utils.Ok[*core.Fish, error](fish)
 }
 
-func (s FishRepository) Delete(id string) utils.Result[string, error] {
-	delete(s.Storage, id)
+func (adapter drivenAdapter) Delete(id string) utils.Result[string, error] {
+	adapter.hash.Remove(id)
 	return utils.Ok[string, error](id)
 }

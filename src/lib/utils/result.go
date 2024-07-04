@@ -1,40 +1,47 @@
 package utils
 
-type Result[T any, E error] struct {
+type result[T any, E error] struct {
 	ok  *T
 	err *E
 }
 
-func Ok[T any, E error](value T) Result[T, E] {
-	return Result[T, E]{
+type Result[T any, E error] interface {
+	IsOk() bool
+	IsErr() bool
+	Unwrap() T
+	UnwrapErr() E
+}
+
+func Ok[T any, E error](value T) result[T, E] {
+	return result[T, E]{
 		ok:  &value,
 		err: nil,
 	}
 }
 
-func Err[T any, E error](err E) Result[T, E] {
-	return Result[T, E]{
+func Err[T any, E error](err E) result[T, E] {
+	return result[T, E]{
 		ok:  nil,
 		err: &err,
 	}
 }
 
-func (r Result[T, E]) IsOk() bool {
+func (r result[T, E]) IsOk() bool {
 	return r.ok != nil
 }
 
-func (r Result[T, E]) IsErr() bool {
+func (r result[T, E]) IsErr() bool {
 	return r.err != nil
 }
 
-func (r Result[T, E]) Unwrap() T {
+func (r result[T, E]) Unwrap() T {
 	if r.ok != nil {
 		return *r.ok
 	}
 	panic("called Unwrap on an Err value")
 }
 
-func (r Result[T, E]) UnwrapErr() E {
+func (r result[T, E]) UnwrapErr() E {
 	if r.err != nil {
 		return *r.err
 	}
@@ -50,7 +57,7 @@ func Map[T any, U any, E error](
 		mapped := callback(value)
 		return Ok[U, E](mapped)
 	}
-	return Err[U, E](result.UnwrapErr())
+	return Err[U](result.UnwrapErr())
 }
 
 func MapError[T any, E1 error, E2 error](
@@ -74,8 +81,5 @@ func AndThen[T any, U any, E error](
 		mapped := callback(value)
 		return mapped
 	}
-	return Err[U, E](result.UnwrapErr())
+	return Err[U](result.UnwrapErr())
 }
-
-// TODO
-// - Option

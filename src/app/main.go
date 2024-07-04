@@ -8,6 +8,7 @@ import (
 	"hexagonal-go/src/lib/driven"
 	"hexagonal-go/src/lib/driving"
 	"hexagonal-go/src/lib/handlers"
+	"hexagonal-go/src/lib/utils"
 
 	"log"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func FishServiceMiddleware(service core.FishDrivingPort) func(next http.Handler) http.Handler {
+func FishServiceMiddleware(service core.Driving) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -27,14 +28,10 @@ func FishServiceMiddleware(service core.FishDrivingPort) func(next http.Handler)
 }
 
 func main() {
-	storage := make(map[string]*core.Fish)
-
-	repository := driven.FishRepository{
-		Storage: storage,
-	}
-
+	hash := utils.Hash[string, *core.Fish]()
+	driven := driven.DrivenAdapter(hash)
 	service := driving.FishService{
-		Repository: repository,
+		Repository: driven,
 	}
 
 	r := mux.NewRouter()

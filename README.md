@@ -33,7 +33,7 @@ Gos type system is small. Small is great as it typically means it is easy to gra
 One of the things I really like with strong typing, is the saftey it provides while refactoring. Change a method signature in some interface and you'll immediately see your tree view light up in red, indicating where you need to look and refactor code.
 
 To me, _the whole point_ of compile time errors and strong typing is to support the developer avoiding bugs and writing quality code. Think about that for a moment:
-> The whole point of typing is to supportthe developer
+> The whole point of typing is to support the developer
 
 Doesn't that mean that in addition to typing and type-errors themselves, it's also _of great importance how those errors are presented to the developer_? One might ask:
 - Are the errors displayed close to where the developer need to tend to the code?
